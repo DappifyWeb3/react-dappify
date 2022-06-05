@@ -11,3 +11,7 @@ export const cropText = (input = '', length = 10) => {
 export const formatAddress = (input = '') => {
     return `${input.substring(0, 6)}...${input.substring(input.length-8, input.length)}`;
 };
+
+export const toUri = (value = '') => {
+    return value.toLocaleLowerCase().replace(' ', '-');
+}

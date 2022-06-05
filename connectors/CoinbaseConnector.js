@@ -3,6 +3,8 @@ import WalletLink from "walletlink";
 import Web3 from "web3";
 import { getPreference } from 'react-dappify/utils/localStorage';
 import constants from 'react-dappify/constants';
+import { Logger } from 'react-dappify/utils/log';
+import defaultConfiguration from 'react-dappify/configuration/default.json';
 
 // @ts-ignore
 class WalletLinkConnector extends Moralis?.AbstractWeb3Connector {
@@ -12,8 +14,8 @@ class WalletLinkConnector extends Moralis?.AbstractWeb3Connector {
   chainId;
   provider;
   walletLink = new WalletLink({
-    appName: getPreference(constants.PREFERENCES.SUBDOMAIN).config?.name,
-    appLogoUrl: getPreference(constants.PREFERENCES.SUBDOMAIN).config?.icon,
+    appName: getPreference(constants.PREFERENCES.SUBDOMAIN)?.config?.name || defaultConfiguration.name,
+    appLogoUrl: getPreference(constants.PREFERENCES.SUBDOMAIN)?.config?.icon || defaultConfiguration.icon,
     darkMode: false,
   });
 
@@ -23,11 +25,11 @@ class WalletLinkConnector extends Moralis?.AbstractWeb3Connector {
    * It should also return the account and chainId, if possible
    */
   async activate() {
-    console.log("????");
-    const appConfiguration = getPreference(constants.PREFERENCES.SUBDOMAIN).config;
-    console.log(appConfiguration);
-    const chainId = appConfiguration.template.chainId;
-    console.log(appConfiguration);
+    Logger.debug(`WalletLink Connector activating`);
+    const appConfiguration = getPreference(constants.PREFERENCES.SUBDOMAIN)?.config;
+    Logger.debug(appConfiguration);
+    const chainId = appConfiguration?.chainId || defaultConfiguration.chainId;
+    Logger.debug(`Using chain ${chainId}`);
     const ethereum = this.walletLink.makeWeb3Provider(constants.SPEEDY_NODE[chainId], 1);
 
     // Store the EIP-1193 provider, account and chainId

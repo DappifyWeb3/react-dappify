@@ -3,6 +3,10 @@ import Moralis from 'moralis';
 import UserProfile from 'react-dappify/model/UserProfile';
 import { getPreference, setPreference } from 'react-dappify/utils/localStorage';
 import isEmpty from 'lodash/isEmpty';
+import { Logger } from 'react-dappify/utils/log';
+import moment from 'moment';
+import axios from 'axios';
+import constants from 'react-dappify/constants';
 
 export default class Project {
 
@@ -12,7 +16,6 @@ export default class Project {
     id;
     config;
     source;
-    isTestEnvironment;
     createdAt;
     updatedAt;
 
@@ -22,34 +25,39 @@ export default class Project {
     }
 
     static load = async() => {
-        const domainName = parse(window.location.hostname);
+        const rawUrl =  window.location.hostname;
+        Logger.debug(`Raw url ${rawUrl}`);
+        let sanitizedUrl = rawUrl.replace('staging.','').replace('dev.','');
+        // Is explicit template defined, remove as well e.g. template.subdomain.<env_removed>.dappify.com
+        const uriComponents = sanitizedUrl.split('.');
+        if (uriComponents.length === 4) {
+            sanitizedUrl = sanitizedUrl.replace(`${process.env.REACT_APP_TEMPLATE_NAME}.`,'');
+        }
+        Logger.debug(`Sanitized url ${sanitizedUrl}`);
+        const domainName = parse(sanitizedUrl);
         const isDappifySubdomain = domainName.domainWithoutSuffix.toLocaleLowerCase() === Project.PLATFORM_DOMAIN;
         const searchKey = isDappifySubdomain ? 'subdomain' : 'domain';
-        const searchValue = isDappifySubdomain ? domainName.subdomain : domainName.hostname;
+        const searchValue = isDappifySubdomain ? domainName.subdomain ? domainName.subdomain : 'studio' : domainName.hostname;
         const projectObject = await Project.getCached(searchKey, searchValue);
         const ProjectObj = Moralis.Object.extend('Project');
-        const project = new ProjectObj();
-        if (isEmpty(projectObject)) {
-            alert("This subdomain is not a dApp");
-            return;
+        const providerProject = new ProjectObj();
+
+        if (isEmpty(projectObject?.objectId)) {
+            Logger.debug(`Not found project`);
+            return new Project();
         }
-        project.id = projectObject.objectId;
-        project.isTestEnvironment = false;
-        project.set('config', projectObject.config);
-        const loadedProject = new Project(project);
-        return loadedProject;
+
+        providerProject.id = projectObject.objectId;
+        providerProject.isTestEnvironment = false;
+        providerProject.set('config', projectObject.config);
+        return new Project(providerProject);
     }
 
-    constructor(project) {
-        return this.#fromProvider(project);
-    }
-
-    #fromProvider = (project) => {
-        this.id = project.id;
-        this.isTestEnvironment = project.isTestEnvironment;
-        this.config = project.get('config');
-        this.createdAt = project.get('createdAt');
-        this.updatedAt = project.get('updatedAt');
+    constructor(project = {}) {
+        this.id = project?.id;
+        this.config = project?.attributes?.config || {};
+        this.createdAt = project?.attributes?.createdAt || moment();
+        this.updatedAt = project?.attributes?.updatedAt || moment();
         this.source = project;
         return this;
     }
@@ -69,6 +77,7 @@ export default class Project {
     static loadFromProvider = async(searchKey, searchValue) => {
         Moralis.start({ appId:process.env.REACT_APP_MORALIS_APP_ID, serverUrl:process.env.REACT_APP_MORALIS_SERVER_URL });
         const query = new Moralis.Query('Project');
+        Logger.debug(`Loading project from provider with searchKey ${searchKey} and value ${searchValue}`);
         query.equalTo(searchKey, searchValue);
         const result = await query.first();
         return result;
@@ -77,7 +86,18 @@ export default class Project {
     static getTokenPrice = async() => {
         const context = await UserProfile.getCurrentUserContext();
         const { currentProject } = context;
-        const tokenPrice = await Moralis.Cloud.run('getTokenPrice', { address: currentProject.config.tokenContractAddress });
+        const chainId = currentProject.config.chainId;
+        let tokenPrice;
+        try {
+            tokenPrice = await axios.get(`https://deep-index.moralis.io/api/v2/erc20/${constants.PRICE_REF_ETH_MAINNET[chainId]}/price?chain=eth`, {
+                headers: {
+                    'X-API-Key': process.env.REACT_APP_MORALIS_API_KEY,
+                    accept: 'application/json'
+                }
+            });
+        } catch (e) {
+            Logger.error(e);
+        }
         return tokenPrice?.data ? tokenPrice.data : {};
     }
 

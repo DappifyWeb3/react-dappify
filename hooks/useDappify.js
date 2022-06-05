@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useMoralis } from 'react-moralis';
-import { ethers } from 'ethers';
 import { loadConfiguration  } from 'react-dappify/configuration';
 import defaultConfiguration from 'react-dappify/configuration/default.json';
 import Project from 'react-dappify/model/Project';
 import UserProfile from 'react-dappify/model/UserProfile';
 import { getProviderPreference, setProviderPreference } from 'react-dappify/utils/localStorage';
+import { Logger } from 'react-dappify/utils/log';
+import isEmpty from 'lodash/isEmpty';
 
 const useDappify = () => {
-    const { authenticate: providerAuthenticate, logout, user, isAuthenticated, Moralis } = useMoralis();
+    const { authenticate: providerAuthenticate, logout, user, isAuthenticated, Moralis, provider } = useMoralis();
     const [configuration, setConfiguration] = useState(defaultConfiguration);
     const [nativeBalance, setNativeBalance] = useState();
-    const [provider, setProvider] = useState();
-    const [isRightNetwork, setRightNetwork] = useState();
+    const [isRightNetwork, setRightNetwork] = useState(false);
     const [project, setProject] = useState();
     const Provider = Moralis;
 
@@ -21,6 +21,18 @@ const useDappify = () => {
         const currentProject = await Project.getInstance();
         setProject(currentProject);
         setConfiguration(currentProject.config);
+        Moralis.onChainChanged((chain) => {
+          onChainChange(chain);
+        });
+        Moralis.onConnect((provider) => {
+          console.log(provider);
+        });
+        Moralis.onAccountChanged((account) => {
+          console.log(account);
+        });
+        Moralis.onDisconnect((error) => {
+          console.log(error);
+        });
       };
 
       bootstrapProject();
@@ -31,42 +43,43 @@ const useDappify = () => {
     },[configuration]);
 
     useEffect(() => {
-        if (!user) return;
-        if (!provider) return;
+        verifyNetwork();
+    }, [provider]);
+
+    useEffect(() => {
+        if (isEmpty(user)) return;
         const loadBalances = async () => {
-          if (!provider?.getBalance) return;
-          const balance = await provider.getBalance(user.get('ethAddress'));
-          const currBalance = parseFloat(ethers.utils.formatEther(balance)).toFixed(3);
+          const balance = await Moralis.Web3API.account.getNativeBalance({
+            chain: configuration.chainId,
+            address: user.get('ethAddress')
+          });
+          const currBalance = parseFloat(Moralis.Units.FromWei(balance.balance)).toFixed(4);
           setNativeBalance(currBalance);
         }
         loadBalances();
-    }, [user, provider]);
+    }, [user, configuration]);
 
-    useEffect(() => {
-        if (!configuration) return;
-        if (!provider) return;
-        const targetNetwork = configuration.template.chainId;
-        if (targetNetwork && provider.provider?.chainId)
-          setRightNetwork(provider.provider.chainId === targetNetwork);
-    }, [provider, configuration]);
-
+    const onChainChange = (chainId) => {
+      if (isEmpty(chainId)) return;
+      const targetNetwork = configuration?.chainId;
+      const isRight = chainId && chainId === targetNetwork;
+      setRightNetwork(isRight);
+      console.log(`Switching to ${chainId} isRightNetwork ${isRight}`);
+    }
+  
     const verifyNetwork = async() => {
-        if (!provider) return;
-        if (!isAuthenticated) return;
-        if (isRightNetwork) return;
-        const network = configuration.template;
-        await switchToChain(network, provider.provider);
+        if (isEmpty(user)) return;
+        if (isEmpty(provider)) return;
+        await switchToChain(configuration, provider.provider);
     }
 
     const switchToChain = async(network, currentProvider) => {
+      if (isRightNetwork) return;
       if (!network) return;
       const chainId = network.chainId;
       if (!chainId) return;
       try {
-        await currentProvider.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId }]
-        });
+        await Moralis.switchNetwork(chainId);
       } catch (error) {
         if (error.code === 4902) {
           try {
@@ -85,13 +98,17 @@ const useDappify = () => {
       let providerUser;
       try {
         setProviderPreference(params);
-        const pref = getProviderPreference();
-        pref.signingMessage = configuration?.name || 'Dappify';
+        const pref = await getProviderPreference();
+        Logger.debug(`Authentication method`);
+        Logger.debug(pref);
+        const principal = configuration?.name || 'Dappify';
+        pref.signingMessage = `${principal} wants to connect!`;
         providerUser = await providerAuthenticate(pref);
-        if (providerUser)
+        if (providerUser) {
           await UserProfile.init(providerUser);
+        }
       } catch (e) {
-        console.log(e);
+        Logger.error(e);
       }
       return providerUser;
     }
@@ -100,10 +117,11 @@ const useDappify = () => {
       let web3;
       try {
         const pref = getProviderPreference();
-        pref.signingMessage = configuration?.name || 'Dappify';
+        const principal = configuration?.name || 'Dappify';
+        pref.signingMessage = `${principal} wants to connect!`;
         web3 = await Moralis.enableWeb3(pref);
-        setProvider(web3);
       } catch(e) {
+        Logger.error(e);
         console.log(e);
       }
       return web3;

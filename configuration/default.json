@@ -5,8 +5,9 @@
   "description": "",
   "operator": "",
   "subdomain": "my-subdomain",
-  "logo": "https://ipfs.io/ipfs/QmZXpF98YKFq5zvjNrzmkwocMJJTKX1UngDAgxVSndS11J",
-  "icon": "https://ipfs.io/ipfs/QmZXpF98YKFq5zvjNrzmkwocMJJTKX1UngDAgxVSndS11J",
+  "logo": "https://gateway.pinata.cloud//ipfs/QmZXpF98YKFq5zvjNrzmkwocMJJTKX1UngDAgxVSndS11J",
+  "icon": "https://gateway.pinata.cloud/ipfs/QmRnoN8iDP3wM1tPuukeTbjiVEZqQS4rDLFWzs24M2uChq",
+  "chainId": "0x1",
   "theme": {
     "shape": {
        "borderRadius": 8
@@ -35,81 +36,6 @@
           }
         }
       }
-    }
-  },
-  "translation": {
-    "resources": {
-      "en": {
-        "translation": {
-          "Title": "Your Title",
-          "Tagline": "Your Tagline",
-          "Get started": "Get started",
-          "Explore": "Discover",
-          "Stats": "Activity",
-          "Search items": "Search items, collections and accounts",
-          "Purchase": "Buy",
-          "View artwork": "View Artwork",
-          "Price": "Price",
-          "Not for sale": "Not for sale",
-          "Browse by category": "Browse By Category",
-          "Top sellers": "Top Sellers",
-          "New items": "New Items",
-          "Hot collections": "Hot Collections",
-          "Connect your wallet": "Connect your wallet",
-          "Most popular": "Most Popular",
-          "Metamask": "Start exploring blockchain applications in seconds. Trusted by over 1 million users worldwide.",
-          "Connected to:": "Connected to:",
-          "Switch to:": "Switch to:",
-          "My profile": "My Profile",
-          "Logout": "Logout",
-          "Balance": "Balance",
-          "Owned": "Owned",
-          "On sale": "On Sale",
-          "Withdraw": "Withdraw",
-          "Edit profile": "Edit Profile",
-          "Member since": "Member since",
-          "Username": "Username",
-          "Username placeholder": "Your unique username",
-          "Bio": "Bio",
-          "Bio placeholder": "Tell everyone who you are!",
-          "Twitter": "Twitter",
-          "Twitter placeholder": "Your personal twitter account",
-          "Wallet": "Wallet",
-          "Wallet placeholder": "Your wallet address",
-          "Profile": "Profile",
-          "Upload": "Upload",
-          "Profile image": "Profile Image",
-          "Profile banner": "Profile Banner",
-          "Update profile": "Update Profile",
-          "Category": "Categories",
-          "None": "None",
-          "Cancel": "Cancel",
-          "Close": "Close",
-          "Load More": "Load More",
-          "Confirm": "Confirm",
-          "Please wait": "Please wait",
-          "Select a category": "Select a category",
-          "Details": "Details",
-          "History": "History",
-          "Owner": "Owner",
-          "Purchase confirmation": "Do you want to buy {{name}} for {{price}} {{unit}}?",
-          "Withdraw confirmation": " This action will remove this item from being accessible in this marketplace for buyers. It will carry additional gas costs to continue the process with the smart contract.",
-          "Withdraw from marketplace": "Withdraw from marketplace",
-          "Edit confirmation": "Set a new price for item in marketplace {{name}}",
-          "Edit pricing": "Edit pricing",
-          "Owner not verified": "This owner is not verified. Purchase this item at your own risk",
-          "Owner verified": "This owner is verified",
-          "Transaction successful": "Your transaction was successful!",
-          "Please do not close this window": "Please don't close this window until we have confirmed your transaction! we will let you know shortly",
-          "WalletConnect": "Open source protocol for connecting decentralised applications to mobile wallets.",
-          "Coinbase": "The easiest and most secure crypto wallet. No Coinbase account required."
-        }
-      }
-    },
-    "lng": "en",
-    "fallbackLng": "en",
-    "interpolation": {
-      "escapeValue": false
     }
   },
   "social": {
@@ -152,59 +78,7 @@
       ]
     }
   },
-  "categories": [
-    {
-      "icon": "test",
-      "uri": "test",
-      "label": "Test"
-    }
-  ],
-  "landingPage": {
-    "background": null,
-    "sections": [
-        {
-          "type": "static",
-          "metadata": {
-            "cta": "/explore",
-            "background": null
-          }
-        },
-        {
-          "type": "individualShowcase",
-          "metadata": {
-
-          }
-        },
-        {
-          "type": "sellers",
-          "metadata": {
-              
-            }
-        },
-        {
-          "type": "groupShowcase",
-          "metadata": {
-              
-            }
-        },
-        {
-          "type": "categories",
-          "metadata": {
-              
-            }
-        }
-      ]
-  },
   "template": {
-    "marketplace": {
-      "test": {
-        "chainId": "",
-        "contract": ""
-      },
-      "main": {
-        "chainId": "",
-        "contract": ""
-      }
-    }
+
   }
 }

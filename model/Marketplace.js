@@ -2,6 +2,7 @@ import Moralis from 'moralis';
 import { ethers } from 'ethers';
 import MarketplaceContract from 'react-dappify/contracts/ERC721MarketplaceV1.sol/ERC721MarketplaceV1.json';
 import { getProviderPreference } from 'react-dappify/utils/localStorage';
+import isEmpty from 'lodash/isEmpty';
 
 export default class Marketplace {
 
@@ -9,6 +10,9 @@ export default class Marketplace {
     marketplaceAddress;
 
     constructor(contractAddress) {
+        if (isEmpty(contractAddress)) {
+            throw new Error('The Marketplace contract is not deployed in this network');
+        }
         this.marketplaceAddress = contractAddress.toLowerCase();
         return this;
     }

@@ -85,6 +85,7 @@ export default class UserProfile {
         this.twitter && userProfile.set('twitter', this.twitter);
         this.instagram && userProfile.set('instagram', this.instagram);
         this.wallet && userProfile.set('wallet', currentUser.get('ethAddress'));
+        this.totalSales && userProfile.set('totalSales', this.totalSales);
         userProfile.set('user', currentUser);
         userProfile.set('project', currentProject.source);
         await userProfile.save();

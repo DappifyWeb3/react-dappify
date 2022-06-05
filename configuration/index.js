@@ -1,6 +1,8 @@
 import Project from 'react-dappify/model/Project';
+import isEmpty from 'lodash/isEmpty';
 
 const setDocumentMetadata = (config) => {
+    if (isEmpty(config)) return;
     document.title = config.name;
     const meta = document.getElementsByTagName('meta');
     meta.namedItem('description').setAttribute('content', config.description);

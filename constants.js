@@ -111,6 +111,16 @@ const constants = {
         Matic: 'https://cryptologos.cc/logos/polygon-matic-logo.svg',
         ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg'
     },
+    PRICE_REF_ETH_MAINNET: {
+        "0x61": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+        "0xa869": "0x85f138bfEE4ef8e540890CFb48F620571d67Eda3",
+        "0x13881": "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+        "0x5": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "0xa86a": "0x85f138bfEE4ef8e540890CFb48F620571d67Eda3", 
+        "0x38": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+        "0x89": "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0", 
+        "0x1": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
     MAINNETS: [
       "0xa86a", "0x38", "0x89", "0x1"
     ],

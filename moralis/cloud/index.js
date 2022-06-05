@@ -2,7 +2,7 @@ const logger = Moralis.Cloud.getLogger();
 
 const getProjectFromUrl = async(url) => {
   logger.info(`[CALL] getProjectFromUrl with url ${url}`);
-  const isDappifySubdomain = url.includes('dappify.com') || url.includes('dappify.us');
+  const isDappifySubdomain = url.includes('dappify.');
   logger.info(`Is url a dappify subdomain? ${isDappifySubdomain}`);
   const hostname = new URL(url.replace("test.","")).hostname;
   const urlParts = hostname.split('.');
