@@ -51,17 +51,18 @@ const useDappify = () => {
         verifyNetwork();
     }, [provider]);
 
+    const loadBalances = async () => {
+      const balance = await Moralis.Web3API.account.getNativeBalance({
+        chain: configuration.chainId,
+        address: user.get('ethAddress')
+      });
+      const currBalance = parseFloat(Moralis.Units.FromWei(balance.balance)).toFixed(4);
+      setNativeBalance(currBalance);
+      getProviderInstance();
+    }
+
     useEffect(() => {
         if (isEmpty(user)) return;
-        const loadBalances = async () => {
-          const balance = await Moralis.Web3API.account.getNativeBalance({
-            chain: configuration.chainId,
-            address: user.get('ethAddress')
-          });
-          const currBalance = parseFloat(Moralis.Units.FromWei(balance.balance)).toFixed(4);
-          setNativeBalance(currBalance);
-          getProviderInstance();
-        }
         loadBalances();
     }, [user, configuration]);
 
@@ -142,7 +143,8 @@ const useDappify = () => {
         provider,
         switchToChain,
         getProviderInstance,
-        currentChain
+        currentChain,
+        loadBalances
     };
 };
 

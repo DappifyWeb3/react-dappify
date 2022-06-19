@@ -118,15 +118,17 @@ export default class Nft {
         const { currentProject } = context;
 
         // Soft check if we have already an OfferingPlaced for this item so we avoid duplicating from UI
-        const query = new Moralis.Query('Transaction');
-        query.equalTo('project', context.currentProject.source);
-        query.equalTo('status', STATUS.OFFERING_PLACED);
-        query.equalTo('contract', this.collection.address);
-        query.equalTo('tokenId', this.tokenId.toString());
-        query.descending("updatedAt");
-        const previousOffering = await query.first() || {};
-        if (!isEmpty(previousOffering)) {
-            throw new Error(`This item is already in the marketplace`);
+        if (this.type === 'ERC721') {
+          const query = new Moralis.Query('Transaction');
+          query.equalTo('project', context.currentProject.source);
+          query.equalTo('status', STATUS.OFFERING_PLACED);
+          query.equalTo('contract', this.collection.address);
+          query.equalTo('tokenId', this.tokenId.toString());
+          query.descending("updatedAt");
+          const previousOffering = await query.first() || {};
+          if (!isEmpty(previousOffering)) {
+              throw new Error(`This item is already in the marketplace`);
+          }
         }
 
         const chainId = currentProject.config.chainId;
@@ -196,6 +198,12 @@ export default class Nft {
         const totalAmount = this.price * qty;
         let transaction = await marketplace.contract.closeOffering(this.offeringId, qty, { value: ethers.utils.parseEther(totalAmount.toString()) });
         const tx = await transaction.wait();
+
+        // Update seller
+        const totalNewSales = this.owner.totalSales + (this.price * qty);
+        this.owner.source.set('totalSales', totalNewSales);
+        await this.owner.source.save();
+
         const remaining = this.quantity - qty;
         if (remaining === 0) {
           this.source.set('status', STATUS.OFFERING_CLOSED);
@@ -204,11 +212,6 @@ export default class Nft {
         this.source.set('quantity', remaining);
         this.source.set('transactionHash', tx.transactionHash);
         await this.source.save();
-
-        // Update seller
-        this.owner.totalSales += (this.price * qty);
-        await this.owner.save({});
-
         return tx.transactionHash;
     }
 
